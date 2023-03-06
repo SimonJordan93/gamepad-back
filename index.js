@@ -6,13 +6,19 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// My RAWG Routes
+// RAWG API Routes
 const GamesRouter = require("./Routes/games");
 const GameRouter = require("./Routes/game");
+const PlatformsRouter = require("./Routes/platforms");
+const GenresRouter = require("./Routes/genres");
+const StoresRouter = require("./Routes/stores");
 
 // Use Routes
 app.use(GamesRouter);
 app.use(GameRouter);
+app.use(PlatformsRouter);
+app.use(GenresRouter);
+app.use(StoresRouter);
 
 // Error Route
 app.all("*", (req, res) => {
