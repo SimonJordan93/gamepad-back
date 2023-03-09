@@ -9,7 +9,7 @@ app.use(cors());
 
 // MongoDB
 mongoose.set("strictQuery", false);
-mongoose.connect("mongodb://localhost:27017/gampepad-app");
+mongoose.connect(process.env.MONGODB_URI);
 
 // RAWG API Routes
 const GamesRouter = require("./Routes/games");
