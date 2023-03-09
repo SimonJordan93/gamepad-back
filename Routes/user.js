@@ -70,9 +70,9 @@ router.post("/signin", async (req, res) => {
     }
     // Si on en trouve on continue
     // Recréer un hash à partir du salt du user trouvé et du MDP reçu
-    console.log(user);
+    // console.log(user);
     const newHash = SHA256(user.salt + password).toString(encBase64);
-    console.log(newHash);
+    // console.log(newHash);
     // Si les hash sont différents on envoie une erreur
     if (newHash !== user.hash) {
       return res.status(401).json({ error: "Unauthorized" });

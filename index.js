@@ -19,7 +19,9 @@ const GenresRouter = require("./Routes/genres");
 const StoresRouter = require("./Routes/stores");
 
 // DataBase Routes
-const UserRoutes = require("./Routes/user");
+const UserRouter = require("./Routes/user");
+const ReviewRouter = require("./Routes/reviews");
+const FavoritesRouter = require("./Routes/favorites");
 
 // Use Routes
 app.use(GamesRouter);
@@ -27,7 +29,9 @@ app.use(GameRouter);
 app.use(PlatformsRouter);
 app.use(GenresRouter);
 app.use(StoresRouter);
-app.use(UserRoutes);
+app.use(UserRouter);
+app.use(ReviewRouter);
+app.use(FavoritesRouter);
 
 // Error Route
 app.all("*", (req, res) => {

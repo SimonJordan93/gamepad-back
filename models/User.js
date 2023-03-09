@@ -1,8 +1,9 @@
+// const { stringify } = require("crypto-js/enc-base64");
 const mongoose = require("mongoose");
 
 const User = mongoose.model("User", {
   email: {
-    nique: true,
+    unique: true,
     type: String,
   },
   account: {
@@ -11,6 +12,13 @@ const User = mongoose.model("User", {
       type: String,
     },
     avatar: Object,
+    favorites: [
+      {
+        gameId: Number,
+        game_name: String,
+        game_image: String,
+      },
+    ],
   },
   token: String,
   hash: String,
