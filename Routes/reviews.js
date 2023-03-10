@@ -48,10 +48,9 @@ router.get("/reviews/game/:gameId", async (req, res) => {
 });
 
 // Upvote a review
-router.put("/reviews/upvote/:id", isAuthenticated, async (req, res) => {
+router.put("/reviews/upvote/:id", async (req, res) => {
   try {
     const review = await Review.findById(req.params.id);
-    const userId = req.user._id;
 
     // Check if user has already upvoted the review
     if (review.usersVoted.includes(userId)) {
@@ -70,7 +69,7 @@ router.put("/reviews/upvote/:id", isAuthenticated, async (req, res) => {
 });
 
 // Downvote a review
-router.put("/reviews/downvote/:id", isAuthenticated, async (req, res) => {
+router.put("/reviews/downvote/:id", async (req, res) => {
   try {
     const review = await Review.findById(req.params.id);
     const userId = req.user._id;
