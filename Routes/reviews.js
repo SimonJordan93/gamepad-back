@@ -1,13 +1,13 @@
+// Import Express library
 const express = require("express");
-
+// Create new Express router
 const router = express.Router();
-
+// Import custom middleware to check if user is authenticated
 const isAuthenticated = require("../middlewares/isAuthenticated");
-
-// Import du modèle User
+// Import Review model
 const Review = require("../models/Reviews");
 
-// Make a Review
+// Create a new review
 router.post("/review/create", isAuthenticated, async (req, res) => {
   try {
     const { title, comment, gameId } = req.body;
@@ -24,12 +24,15 @@ router.post("/review/create", isAuthenticated, async (req, res) => {
         .json({ message: "You have already reviewed this game" });
     }
 
+    // Create new Review object with given parameters
     const newReview = new Review({
       gameId: gameId,
       title: title,
       comment: comment,
       usersReviewed: [userId],
     });
+
+    // Save new review to database
     await newReview.save();
     res.json(newReview);
   } catch (error) {
@@ -37,7 +40,7 @@ router.post("/review/create", isAuthenticated, async (req, res) => {
   }
 });
 
-// Find all Reviews for a game
+// Find all reviews for a given game ID
 router.get("/reviews/game/:gameId", async (req, res) => {
   try {
     const gameReviews = await Review.find({ gameId: req.params.gameId });
@@ -51,6 +54,7 @@ router.get("/reviews/game/:gameId", async (req, res) => {
 router.put("/reviews/upvote/:id", async (req, res) => {
   try {
     const review = await Review.findById(req.params.id);
+    const userId = req.user._id;
 
     // Check if user has already upvoted the review
     if (review.usersVoted.includes(userId)) {
@@ -59,8 +63,11 @@ router.put("/reviews/upvote/:id", async (req, res) => {
         .json({ message: "You have already voted on this review" });
     }
 
+    // Increment upvotes and add user to usersVoted array
     review.upvotes += 1;
     review.usersVoted.push(userId);
+
+    // Save updated review to database
     await review.save();
     res.json(review);
   } catch (error) {
@@ -81,8 +88,11 @@ router.put("/reviews/downvote/:id", async (req, res) => {
         .json({ message: "You have already voted on this review" });
     }
 
+    // Increment downvotes and add user to usersVoted array
     review.downvotes += 1;
     review.usersVoted.push(userId);
+
+    // Save updated review to database
     await review.save();
     res.json(review);
   } catch (error) {
@@ -90,5 +100,5 @@ router.put("/reviews/downvote/:id", async (req, res) => {
   }
 });
 
-// Export de router qui contient mes routes
+// Export the router containing the review routes
 module.exports = router;

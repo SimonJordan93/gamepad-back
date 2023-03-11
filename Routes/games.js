@@ -14,8 +14,8 @@ router.get("/games", async (req, res) => {
 
     let url = `https://api.rawg.io/api/games?key=${process.env.RAWG_API_KEY}&page=${page}&search_precise=true&search=${search}`;
 
-    if (parent_platforms) {
-      url += `&parent_platforms=${parent_platforms}`;
+    if (platforms) {
+      url += `&platforms=${platforms}`;
     }
     if (genres) {
       url += `&genres=${genres}`;

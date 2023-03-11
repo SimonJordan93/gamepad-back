@@ -9,21 +9,16 @@ router.post("/favorites/add", isAuthenticated, async (req, res) => {
 
   try {
     // Check if the game already exists in the user's favorites
-    const existingFavorite = await Favorites.findOne({
-      user: req.user._id,
-      gameId: gameId,
-    });
 
-    if (existingFavorite) {
-      return res.status(409).json({ message: "Game already in favorites" });
-    }
+    // if (existingFavorite) {
+    //   return res.status(409).json({ message: "Game already in favorites" });
+    // }
 
     // Create a new Favorites document and associate it with the current user
     const newFavorite = new Favorites({
       gameId: gameId,
       game_name: game_name,
       game_image: game_image,
-      user: req.user._id,
     });
 
     // Save the new Favorites document to the database
