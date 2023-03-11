@@ -7,7 +7,7 @@ router.get("/games", async (req, res) => {
   try {
     const search = req.query.search || "";
     const page = req.query.page || 1;
-    let parent_platforms = req.query.parent_platforms;
+    let platforms = req.query.platforms;
     let genres = req.query.genres;
     let stores = req.query.stores;
     let ordering = req.query.ordering;
