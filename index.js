@@ -13,10 +13,6 @@ mongoose.connect(process.env.MONGODB_URI);
 
 // RAWG API Routes
 const GamesRouter = require("./Routes/games");
-const GameRouter = require("./Routes/game");
-const PlatformsRouter = require("./Routes/platforms");
-const GenresRouter = require("./Routes/genres");
-const StoresRouter = require("./Routes/stores");
 
 // DataBase Routes
 const UserRouter = require("./Routes/user");
@@ -25,10 +21,7 @@ const FavoritesRouter = require("./Routes/favorites");
 
 // Use Routes
 app.use(GamesRouter);
-app.use(GameRouter);
-app.use(PlatformsRouter);
-app.use(GenresRouter);
-app.use(StoresRouter);
+
 app.use(UserRouter);
 app.use(ReviewRouter);
 app.use(FavoritesRouter);

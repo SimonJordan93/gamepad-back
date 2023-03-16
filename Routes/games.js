@@ -36,4 +36,62 @@ router.get("/games", async (req, res) => {
   }
 });
 
+// Game Details Route (by Id)
+router.get("/game/:gameId", async (req, res) => {
+  try {
+    const { gameId } = req.params;
+
+    const response = await axios.get(
+      `https://api.rawg.io/api/games/${gameId}?key=${process.env.RAWG_API_KEY}`
+    );
+
+    res.json(response.data);
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// Platforms Route (by Id)
+router.get("/platforms", async (req, res) => {
+  try {
+    const response = await axios.get(
+      `https://api.rawg.io/api/platforms?key=${process.env.RAWG_API_KEY}`
+    );
+
+    res.json(response.data);
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// Genres Route (by Id)
+router.get("/genres", async (req, res) => {
+  try {
+    const response = await axios.get(
+      `https://api.rawg.io/api/genres?key=${process.env.RAWG_API_KEY}`
+    );
+
+    res.json(response.data);
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// Stores Route (by Id)
+router.get("/stores", async (req, res) => {
+  try {
+    const response = await axios.get(
+      `https://api.rawg.io/api/stores?key=${process.env.RAWG_API_KEY}`
+    );
+
+    res.json(response.data);
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ message: error.message });
+  }
+});
+
 module.exports = router;
