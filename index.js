@@ -17,14 +17,13 @@ const GamesRouter = require("./Routes/games");
 // DataBase Routes
 const UserRouter = require("./Routes/user");
 const ReviewRouter = require("./Routes/reviews");
-const FavoritesRouter = require("./Routes/favorites");
+const CollectionRouter = require("./Routes/collection");
 
 // Use Routes
 app.use(GamesRouter);
-
 app.use(UserRouter);
 app.use(ReviewRouter);
-app.use(FavoritesRouter);
+app.use(CollectionRouter);
 
 // Error Route
 app.all("*", (req, res) => {

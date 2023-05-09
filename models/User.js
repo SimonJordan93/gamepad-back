@@ -1,11 +1,8 @@
 // Import the Mongoose library to help with MongoDB object modeling
 const mongoose = require("mongoose");
 
-// Import the arrayBuffer consumer from the 'node:stream/consumers' module
-const { arrayBuffer } = require("node:stream/consumers");
-
 // Define the User model schema using Mongoose
-const User = mongoose.model("User", {
+const UserSchema = new mongoose.Schema({
   // The email field is a unique String type
   email: {
     unique: true,
@@ -20,11 +17,12 @@ const User = mongoose.model("User", {
     },
     // The avatar field is an Object type for storing user profile image metadata
     avatar: Object,
-    // The collection field is an Array type for storing a list of user's items
-    collection: Array,
-    // The wishlist field is an Array type for storing a list of desired items
-    wishlist: Array,
   },
+  // Reference to the Favorites Items added by user
+  favouritesItem: [
+    { type: mongoose.Schema.Types.ObjectId, ref: "FavouritesItem" },
+  ],
+
   // The token field is a String type for storing user authentication tokens
   token: String,
   // The hash field is a String type for storing the user's password hash
@@ -32,6 +30,9 @@ const User = mongoose.model("User", {
   // The salt field is a String type for storing the user's password salt
   salt: String,
 });
+
+// Define the User model using the UserSchema
+const User = mongoose.model("User", UserSchema);
 
 // Export the User model so it can be imported and used in other parts of the application
 module.exports = User;

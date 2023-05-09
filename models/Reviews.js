@@ -1,8 +1,8 @@
 // Import Mongoose library
 const mongoose = require("mongoose");
 
-// Define Mongoose Model for a review
-const Review = new mongoose.model("Review", {
+// Define Mongoose Schema for a review
+const ReviewSchema = new mongoose.Schema({
   // ID of the game being reviewed (required)
   gameId: { type: Number, required: true },
   // Title of the review (required)
@@ -18,6 +18,9 @@ const Review = new mongoose.model("Review", {
   // Array of users who have voted on the review (references to "User" collection)
   usersVoted: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
 });
+
+// Define Mongoose Model for a review
+const Review = mongoose.model("Review", ReviewSchema);
 
 // Export model for use in other parts of code
 module.exports = Review;

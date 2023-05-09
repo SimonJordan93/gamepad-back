@@ -1,41 +1,46 @@
+// Import required dependencies
 const express = require("express");
 const uid2 = require("uid2");
 const SHA256 = require("crypto-js/sha256");
 const encBase64 = require("crypto-js/enc-base64");
 const router = express.Router();
 
+// Import the User model
 const User = require("../models/User");
 
-// Sign Up User
+//  Import Authentication middleware
+const isAuthenticated = require("../middlewares/isAuthenticated");
+const { find } = require("../models/Wishlist");
+
+// Route for signing up a new user
 router.post("/signup", async (req, res) => {
   try {
-    // console.log(req.body);
-    // Destructuring
-
+    // Extract the user input from the request body
     const { email, username, password, confirmPassword } = req.body;
 
-    console.log(req.body);
-
+    // Check if any required fields are missing
     if (!username || !email || !password || !confirmPassword) {
       return res.status(400).json({ message: "Missing parameter" });
     }
 
+    // Check if the two password inputs match
     if (password !== confirmPassword) {
       return res.status(400).json({ message: "Passwords do not match !" });
     }
 
-    // Si l'email est déjà utilisé par quelqu'un d'autre, on renvoie une erreur
+    // Check if the email is already used by another user
     const emailAlreadyUsed = await User.findOne({ email });
-    // console.log(emailAlreadyUsed);
 
     if (emailAlreadyUsed) {
       return res.status(409).json({ message: "This email is already used" });
     }
 
+    // Generate a new token, salt, and hash for the new user
     const token = uid2(64);
     const salt = uid2(16);
     const hash = SHA256(salt + password).toString(encBase64);
 
+    // Create a new user object with the provided data
     const newUser = new User({
       email: email,
       account: {
@@ -45,7 +50,11 @@ router.post("/signup", async (req, res) => {
       hash: hash,
       salt: salt,
     });
+
+    // Save the new user object to the database
     await newUser.save();
+
+    // Send the relevant user data as a response
     const response = {
       _id: newUser._id,
       account: newUser.account,
@@ -53,59 +62,91 @@ router.post("/signup", async (req, res) => {
     };
     res.json(response);
   } catch (error) {
+    // Handle errors and send the error message as a JSON response
     res.status(400).json({ message: error.message });
   }
 });
 
-// Sign In User
+// Route for signing in an existing user
 router.post("/signin", async (req, res) => {
   try {
-    // console.log(req.body);
+    // Extract the email and password from the request body
     const { email, password } = req.body;
-    // Aller chercher le user dont le mail est celui reçu
+
+    // Check if the user exists in the database
     const user = await User.findOne({ email: email });
-    // Si on en trouve pas on envoie une erreur
+
     if (!user) {
       return res.status(401).json({ error: "Unauthorized" });
     }
-    // Si on en trouve on continue
-    // Recréer un hash à partir du salt du user trouvé et du MDP reçu
-    // console.log(user);
+
+    // Calculate the hash of the provided password and compare it to the stored hash
     const newHash = SHA256(user.salt + password).toString(encBase64);
-    // console.log(newHash);
-    // Si les hash sont différents on envoie une erreur
+
     if (newHash !== user.hash) {
       return res.status(401).json({ error: "Unauthorized" });
     }
-    // Si ce hash est le même que le hash en BDD on autorise la connexion
 
+    // Send the relevant user data as a JSON response
     res.json({
       _id: user._id,
       account: user.account,
       token: user.token,
     });
   } catch (error) {
+    // Handle errors and send the error message as a JSON response
     res.status(400).json({ message: error.message });
   }
 });
 
-// Delete User
-router.delete("/delete", async (req, res) => {
+// Route to Get UsersCollection from DB
+router.get("/userCollection", isAuthenticated, async (req, res) => {
   try {
-    console.log(req.body._id);
-    if (req.body._id) {
-      // si l'id a bien été transmis
-      // On recherche le "user" à modifier à partir de son id et on le supprime :
-      await User.findByIdAndDelete(req.body._id);
-      // On répond au client :
-      res.json({ message: "User removed" });
-    } else {
-      // si aucun id n'a été transmis :
-      res.status(400).json({ message: "Missing id" });
-    }
+    const userId = req.user._id;
+
+    const users = await User.findOne().populate(
+      "collectionItem",
+      "usersCollection"
+    );
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 });
 
+// Route to Get UsersFavourites from DB
+router.get("/userFavourites", isAuthenticated, async (req, res) => {
+  try {
+    const users = await User.find().populate(
+      "favouritesItem",
+      "usersFavourites"
+    );
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// Route for deleting a user
+// Authentication of user is necessary (via token)
+router.delete("/delete", isAuthenticated, async (req, res) => {
+  try {
+    // Extract the user id from the request body
+    const userId = req.body._id;
+
+    if (userId) {
+      // Delete the user from the database
+      await User.findByIdAndDelete(userId);
+
+      // Send a success message as a JSON response
+      res.json({ message: "User removed" });
+    } else {
+      // Send an error message if the user id is missing
+      res.status(400).json({ message: "Missing id" });
+    }
+  } catch (error) {
+    // Handle errors and send the error message as a JSON response
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// Export the router object so it can be used in other parts of the application
 module.exports = router;
