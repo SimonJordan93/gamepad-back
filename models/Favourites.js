@@ -1,4 +1,3 @@
-const { stringify } = require("crypto-js/enc-base64");
 const mongoose = require("mongoose");
 
 const FavouritesItemSchema = new mongoose.Schema({
@@ -12,6 +11,6 @@ const FavouritesItemSchema = new mongoose.Schema({
   usersFavourites: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
 });
 
-const FavoritesItem = mongoose.model("FavouritesItem", FavouritesItemSchema);
+const FavouritesItem = mongoose.model("FavouritesItem", FavouritesItemSchema);
 
 module.exports = FavouritesItem;

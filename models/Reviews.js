@@ -15,8 +15,6 @@ const ReviewSchema = new mongoose.Schema({
   downvotes: { type: Number, default: 0 },
   // User who created the review (reference to "User" collection)
   userReview: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-  // Array of users who have voted on the review (references to "User" collection)
-  usersVoted: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
 });
 
 // Define Mongoose Model for a review

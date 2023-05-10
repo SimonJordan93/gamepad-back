@@ -6,6 +6,8 @@ const router = express.Router();
 const isAuthenticated = require("../middlewares/isAuthenticated");
 // Import Review model
 const Review = require("../models/Reviews");
+// Import Votes model
+const Vote = require("../models/Votes");
 
 // Create a new review
 router.post("/review/create", isAuthenticated, async (req, res) => {
@@ -16,7 +18,7 @@ router.post("/review/create", isAuthenticated, async (req, res) => {
     // Check if user has already reviewed the game
     const existingReview = await Review.findOne({
       gameId,
-      usersReviewed: userId,
+      userReview: userId,
     });
     if (existingReview) {
       return res
@@ -29,7 +31,7 @@ router.post("/review/create", isAuthenticated, async (req, res) => {
       gameId: gameId,
       title: title,
       comment: comment,
-      usersReviewed: [userId],
+      userReview: userId,
     });
 
     // Save new review to database
@@ -50,24 +52,76 @@ router.get("/reviews/game/:gameId", async (req, res) => {
   }
 });
 
-// Upvote a review
-router.put("/reviews/upvote/:id", async (req, res) => {
+// Find all reviews for a given user ID
+router.get("/reviews/:userId", async (req, res) => {
   try {
-    const review = await Review.findById(req.params.id);
-    const userId = req.user._id;
+    const userReviews = await Review.find({ userReview: req.params.userId });
+    res.json(userReviews);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
 
-    // Check if user has already upvoted the review
-    if (review.usersVoted.includes(userId)) {
-      return res
-        .status(400)
-        .json({ message: "You have already voted on this review" });
+// Vote for a review
+router.post("/reviews/vote/:reviewId", isAuthenticated, async (req, res) => {
+  try {
+    const reviewId = req.params.reviewId;
+    const userId = req.user._id;
+    const voteType = req.body.voteType; // "upvote" or "downvote"
+
+    // Find the review
+    const review = await Review.findById(reviewId);
+    if (!review) {
+      return res.status(404).json({ message: "Review not found" });
     }
 
-    // Increment upvotes and add user to usersVoted array
-    review.upvotes += 1;
-    review.usersVoted.push(userId);
+    // Check if the user has already voted
+    const existingVote = await Vote.findOne({ user: userId, review: reviewId });
 
-    // Save updated review to database
+    if (existingVote) {
+      if (voteType === "upvote" && existingVote.upvote) {
+        // User clicked the same vote type again, remove the vote
+        review.upvotes -= 1;
+        existingVote.upvote = false;
+      } else if (voteType === "downvote" && existingVote.downvote) {
+        // User clicked the same vote type again, remove the vote
+        review.downvotes -= 1;
+        existingVote.downvote = false;
+      }
+      // User clicked the opposite vote type, update the vote
+      else if (voteType === "upvote" && existingVote.downvote) {
+        review.upvotes += 1;
+        review.downvotes -= 1;
+        existingVote.upvote = true;
+        existingVote.downvote = false;
+      } else if (voteType === "downvote" && existingVote.upvote) {
+        review.upvotes -= 1;
+        review.downvotes += 1;
+        existingVote.upvote = false;
+        existingVote.downvote = true;
+      } else if (voteType === "upvote") {
+        review.upvotes += 1;
+        existingVote.upvote = true;
+      } else if (voteType === "downvote") {
+        review.downvotes += 1;
+        existingVote.downvote = true;
+      }
+
+      await existingVote.save();
+    } else {
+      // User has not voted before, create a new vote
+      const newVote = new Vote({ user: userId, review: reviewId });
+      if (voteType === "upvote") {
+        review.upvotes += 1;
+        newVote.upvote = true;
+      } else {
+        review.downvotes += 1;
+        newVote.downvote = true;
+      }
+      await newVote.save();
+    }
+
+    // Save the updated review
     await review.save();
     res.json(review);
   } catch (error) {
@@ -75,26 +129,53 @@ router.put("/reviews/upvote/:id", async (req, res) => {
   }
 });
 
-// Downvote a review
-router.put("/reviews/downvote/:id", async (req, res) => {
+//Update a Review
+router.put("/reviews/:reviewId", isAuthenticated, async (req, res) => {
   try {
-    const review = await Review.findById(req.params.id);
+    const reviewId = req.params.reviewId;
     const userId = req.user._id;
 
-    // Check if user has already downvoted the review
-    if (review.usersVoted.includes(userId)) {
-      return res
-        .status(400)
-        .json({ message: "You have already voted on this review" });
+    // Find the review
+    const review = await Review.findById(reviewId);
+    if (!review) {
+      return res.status(404).json({ message: "Review not found" });
     }
 
-    // Increment downvotes and add user to usersVoted array
-    review.downvotes += 1;
-    review.usersVoted.push(userId);
+    // Check if the user is the author of the review
+    if (review.userReview.toString() !== userId.toString()) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
 
-    // Save updated review to database
+    // Update the review
+    review.title = req.body.title;
+    review.comment = req.body.comment;
     await review.save();
     res.json(review);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// Delete a review
+router.delete("/reviews/:reviewId", isAuthenticated, async (req, res) => {
+  try {
+    const reviewId = req.params.reviewId;
+    const userId = req.user._id;
+
+    // Find the review
+    const review = await Review.findById(reviewId);
+    if (!review) {
+      return res.status(404).json({ message: "Review not found" });
+    }
+
+    // Check if the user is the author of the review
+    if (review.userReview.toString() !== userId.toString()) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    // Delete the review
+    await Review.findByIdAndDelete(reviewId);
+    res.json({ message: "Review deleted" });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }

@@ -22,7 +22,6 @@ const UserSchema = new mongoose.Schema({
   favouritesItem: [
     { type: mongoose.Schema.Types.ObjectId, ref: "FavouritesItem" },
   ],
-
   // The token field is a String type for storing user authentication tokens
   token: String,
   // The hash field is a String type for storing the user's password hash

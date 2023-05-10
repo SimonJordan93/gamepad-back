@@ -17,13 +17,13 @@ const GamesRouter = require("./Routes/games");
 // DataBase Routes
 const UserRouter = require("./Routes/user");
 const ReviewRouter = require("./Routes/reviews");
-const CollectionRouter = require("./Routes/collection");
+const FavouritesRouter = require("./Routes/favourites");
 
 // Use Routes
 app.use(GamesRouter);
 app.use(UserRouter);
 app.use(ReviewRouter);
-app.use(CollectionRouter);
+app.use(FavouritesRouter);
 
 // Error Route
 app.all("*", (req, res) => {
@@ -31,6 +31,6 @@ app.all("*", (req, res) => {
 });
 
 // Server Port
-app.listen(process.env.PORT, () => {
+app.listen(process.env.PORT || 3500, () => {
   console.log("Server started");
 });

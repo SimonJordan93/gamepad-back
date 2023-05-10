@@ -10,7 +10,6 @@ const User = require("../models/User");
 
 //  Import Authentication middleware
 const isAuthenticated = require("../middlewares/isAuthenticated");
-const { find } = require("../models/Wishlist");
 
 // Route for signing up a new user
 router.post("/signup", async (req, res) => {
@@ -96,32 +95,6 @@ router.post("/signin", async (req, res) => {
   } catch (error) {
     // Handle errors and send the error message as a JSON response
     res.status(400).json({ message: error.message });
-  }
-});
-
-// Route to Get UsersCollection from DB
-router.get("/userCollection", isAuthenticated, async (req, res) => {
-  try {
-    const userId = req.user._id;
-
-    const users = await User.findOne().populate(
-      "collectionItem",
-      "usersCollection"
-    );
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-});
-
-// Route to Get UsersFavourites from DB
-router.get("/userFavourites", isAuthenticated, async (req, res) => {
-  try {
-    const users = await User.find().populate(
-      "favouritesItem",
-      "usersFavourites"
-    );
-  } catch (error) {
-    res.status(400).json({ error: error.message });
   }
 });
 
