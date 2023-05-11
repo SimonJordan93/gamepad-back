@@ -7,8 +7,9 @@ const FavouritesItemSchema = new mongoose.Schema({
   gameTitle: String,
 
   gameImg: String,
+
   // Reference to the Users who added the item to their Favourites
-  usersFavourites: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+  userFavourites: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
 });
 
 const FavouritesItem = mongoose.model("FavouritesItem", FavouritesItemSchema);

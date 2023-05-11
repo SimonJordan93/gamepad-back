@@ -43,7 +43,7 @@ router.post("/review/create", isAuthenticated, async (req, res) => {
 });
 
 // Find all reviews for a given game ID
-router.get("/reviews/game/:gameId", async (req, res) => {
+router.get("/review/:gameId", async (req, res) => {
   try {
     const gameReviews = await Review.find({ gameId: req.params.gameId });
     res.json(gameReviews);
@@ -53,7 +53,7 @@ router.get("/reviews/game/:gameId", async (req, res) => {
 });
 
 // Find all reviews for a given user ID
-router.get("/reviews/:userId", async (req, res) => {
+router.get("/review/:userId", async (req, res) => {
   try {
     const userReviews = await Review.find({ userReview: req.params.userId });
     res.json(userReviews);
@@ -63,7 +63,7 @@ router.get("/reviews/:userId", async (req, res) => {
 });
 
 // Vote for a review
-router.post("/reviews/vote/:reviewId", isAuthenticated, async (req, res) => {
+router.post("/review/vote/:reviewId", isAuthenticated, async (req, res) => {
   try {
     const reviewId = req.params.reviewId;
     const userId = req.user._id;
@@ -130,7 +130,7 @@ router.post("/reviews/vote/:reviewId", isAuthenticated, async (req, res) => {
 });
 
 //Update a Review
-router.put("/reviews/:reviewId", isAuthenticated, async (req, res) => {
+router.put("/review/:reviewId", isAuthenticated, async (req, res) => {
   try {
     const reviewId = req.params.reviewId;
     const userId = req.user._id;
@@ -157,7 +157,7 @@ router.put("/reviews/:reviewId", isAuthenticated, async (req, res) => {
 });
 
 // Delete a review
-router.delete("/reviews/:reviewId", isAuthenticated, async (req, res) => {
+router.delete("/review/:reviewId", isAuthenticated, async (req, res) => {
   try {
     const reviewId = req.params.reviewId;
     const userId = req.user._id;

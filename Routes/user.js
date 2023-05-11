@@ -98,8 +98,109 @@ router.post("/signin", async (req, res) => {
   }
 });
 
+// Route for getting a user profile
+router.get("/profile", isAuthenticated, async (req, res) => {
+  try {
+    // Extract the user id from the request body
+    const userId = req.user._id;
+
+    // Check if the user exists in the database
+    const user = await User.findById(userId).select("-salt -hash -token");
+
+    if (!user) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    // Send the relevant user data as a JSON response
+    res.json({
+      user,
+    });
+  } catch (error) {
+    // Handle errors and send the error message as a JSON response
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// Route for updating a user email
+router.patch("/update/email", isAuthenticated, async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const newEmail = req.body.email;
+
+    if (newEmail) {
+      const emailAlreadyUsed = await User.findOne({ email: newEmail });
+      if (emailAlreadyUsed) {
+        return res.status(409).json({ message: "This email is already used" });
+      }
+      await User.findByIdAndUpdate(userId, {
+        email: newEmail,
+      });
+      res.json({ message: "Email updated" });
+    } else {
+      res.status(400).json({ message: "Missing new email" });
+    }
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// Route for updating a user username
+router.patch("/update/username", isAuthenticated, async (req, res) => {
+  try {
+    // Extract the user id from the request body
+    const userId = req.user._id;
+    const newUsername = req.body.username;
+
+    if (userId) {
+      // Update the username in the database
+      await User.findByIdAndUpdate(userId, {
+        account: {
+          username: newUsername,
+        },
+      });
+
+      // Send a success message as a JSON response
+      res.json({ message: "Username updated" });
+    }
+  } catch (error) {
+    // Handle errors and send the error message as a JSON response
+    res.status(400).json({ message: error.message });
+  }
+});
+
+router.patch("/update/password", isAuthenticated, async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { currentPassword, newPassword, confirmPassword } = req.body;
+
+    if (currentPassword && newPassword && confirmPassword) {
+      const user = await User.findById(userId);
+      const currentHash = SHA256(user.salt + currentPassword).toString(
+        encBase64
+      );
+
+      if (currentHash !== user.hash) {
+        return res.status(401).json({ error: "Incorrect current password" });
+      }
+
+      if (newPassword !== confirmPassword) {
+        return res.status(400).json({ message: "Passwords do not match" });
+      }
+
+      const newSalt = uid2(16);
+      const newHash = SHA256(newSalt + newPassword).toString(encBase64);
+
+      await User.findByIdAndUpdate(userId, { salt: newSalt, hash: newHash });
+      res.json({ message: "Password updated" });
+    } else {
+      res.status(400).json({ message: "Missing required fields" });
+    }
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
 // Route for deleting a user
-// Authentication of user is necessary (via token)
 router.delete("/delete", isAuthenticated, async (req, res) => {
   try {
     // Extract the user id from the request body
@@ -117,7 +218,7 @@ router.delete("/delete", isAuthenticated, async (req, res) => {
     }
   } catch (error) {
     // Handle errors and send the error message as a JSON response
-    res.status(400).json({ error: error.message });
+    res.status(400).json({ message: error.message });
   }
 });
 
