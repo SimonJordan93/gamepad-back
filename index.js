@@ -31,6 +31,6 @@ app.all("*", (req, res) => {
 });
 
 // Server Port
-app.listen(process.env.PORT || 3500, () => {
+app.listen(process.env.PORT, () => {
   console.log("Server started");
 });
