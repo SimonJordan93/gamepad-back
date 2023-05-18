@@ -17,7 +17,6 @@ User Routes:
 - [x] PATCH/update/username
 - [x] PATCH/update/password
 - [ ] PATCH/update/avatar
-- [x] POST/delete
 - [x] DELETE/delete
 
 Review Routes:

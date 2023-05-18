@@ -8,14 +8,14 @@ router.get("/games", async (req, res) => {
   try {
     // Extract query parameters from the request
     const search = req.query.search || "";
-    const page = req.query.page || 1;
+    const page = req.query.pageParam || 1;
     let platforms = req.query.platforms;
     let genres = req.query.genres;
     let stores = req.query.stores;
     let ordering = req.query.ordering;
 
     // Construct the URL for RAWG API with the given query parameters
-    let url = `https://api.rawg.io/api/games?key=${process.env.RAWG_API_KEY}&page=${page}&search_precise=true&search=${search}`;
+    let url = `https://api.rawg.io/api/games?key=${process.env.RAWG_API_KEY}&page=${pagParam}&search_precise=true&search=${search}`;
 
     // Add additional query parameters if they are present
     if (platforms) {
